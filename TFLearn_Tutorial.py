@@ -24,6 +24,7 @@
 
 # This tutorial will use TensorFlow, TF Learn, sklearn, and pandas
 import random
+import numpy
 import tensorflow as tf
 import tensorflow.contrib.skflow as learn
 from sklearn.cross_validation import train_test_split
@@ -53,6 +54,7 @@ print(labels.head())
 # Our model needs to know the number of classes we're predicting
 y_classes = len(labels[0].unique()) + 1
 
+# Remove this exit to move on
 exit()
 
 '''
@@ -74,6 +76,7 @@ labels_oneHot = pandas.get_dummies(text_labels)
 print(labels_oneHot.head())
 # We won't use our one-hot labels for this experiment, but this is a common machine learning task
 
+# Remove this exit to move on
 exit()
 
 '''
@@ -100,6 +103,7 @@ print(data.describe())
 # Setting a random seed allows for continuity between runs
 X_train, X_dev, y_train, y_dev = train_test_split(data, labels, test_size=0.2, random_state=42)
 
+# Remove this exit to move on
 exit()
 
 '''
@@ -119,6 +123,7 @@ predictions = classifier.predict(X_dev)
 score = metrics.accuracy_score(y_dev, predictions)
 print("Accuracy: %f" % score)
 
+# Remove this exit to move on
 exit()
 
 '''
@@ -182,6 +187,7 @@ print("Accuracy: %f" % score)
 
 # We got 100% accuracy, but keep in mind our dataset has only 150 datapoints.
 
+# Remove this exit to move on
 exit()
 
 '''
