@@ -12,6 +12,9 @@
     7. Tune the model with random hyperparameter search
     8. Log our hyper parameter search to a sortable csv file
 
+    Each section has an exit().
+    Remove the exit() as you progress through each section.
+
     You'll turn in the csv of your hyperparameter search to canvas.
 
     For more tutorials and examples, see the TF Learn home page:
@@ -50,6 +53,8 @@ print(labels.head())
 # Our model needs to know the number of classes we're predicting
 y_classes = len(labels[0].unique()) + 1
 
+exit()
+
 '''
 Part 2 : Categorical Data Processing
 ------------------------------------------------------------------------------------------------------------------
@@ -68,6 +73,8 @@ labels_oneHot = pandas.get_dummies(text_labels)
 # Let's look at our new one-hot labels. Each column now represents a category
 print(labels_oneHot.head())
 # We won't use our one-hot labels for this experiment, but this is a common machine learning task
+
+exit()
 
 '''
 Part 3 : Scaling Continuous Features
@@ -93,6 +100,8 @@ print(data.describe())
 # Setting a random seed allows for continuity between runs
 X_train, X_dev, y_train, y_dev = train_test_split(data, labels, test_size=0.2, random_state=42)
 
+exit()
+
 '''
 Part 4 : Simple DNN
 ------------------------------------------------------------------------------------------------------------------
@@ -109,6 +118,8 @@ classifier.fit(X_train, y_train, logdir='dnnLogs')
 predictions = classifier.predict(X_dev)
 score = metrics.accuracy_score(y_dev, predictions)
 print("Accuracy: %f" % score)
+
+exit()
 
 '''
 Part 5 : TensorBoard
@@ -171,6 +182,8 @@ print("Accuracy: %f" % score)
 
 # We got 100% accuracy, but keep in mind our dataset has only 150 datapoints.
 
+exit()
+
 '''
 Part 7 : Hyperparameter Search
 ------------------------------------------------------------------------------------------------------------------
@@ -220,9 +233,6 @@ def getHyperparameters(tune=False):
         'KEEP_PROB':0.6,
         'MAX_BAD_COUNT':random.randrange(10,1000,10)
         }
-
-        # hidden_units = list(hyperparams['NUM_UNITS'] for i in range(hyperparams['NUM_LAYERS']))
-        # print hidden_units
 
     return hyperparams
 
