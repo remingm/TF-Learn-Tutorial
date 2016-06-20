@@ -31,6 +31,7 @@ from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 from sklearn import preprocessing
 import pandas
+import os
 
 '''
 Part 1 : Load Data
@@ -279,14 +280,11 @@ for i in range(100):
     print(log)
 
     # Write to a csv file
-    if i == 0:
+    csvName = 'model_log.csv'
+    if not (os.path.exists(csvName)):
         # First run, write headers
         log.to_csv('model_log.csv', mode='a')
     else:
         log.to_csv('model_log.csv', mode='a',header=False)
 
 # Open the csv file in libreoffice. Now you can sort thousands of runs by dev accuracy and find the best hyperparameters.
-
-
-
-
