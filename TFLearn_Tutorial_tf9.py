@@ -113,11 +113,14 @@ Part 4 : Simple DNN
 '''
 # Now we'll create a simple deep neural network tensorflow graph
 # For regression you can use learn.TensorFlowDNNRegressor
-classifier = learn.TensorFlowDNNClassifier(hidden_units=[10, 20, 10], n_classes=y_classes, batch_size=32,steps=100,
-                                           optimizer="Adam",learning_rate=0.01,dropout=0.6)
+# classifier = learn.TensorFlowDNNClassifier(hidden_units=[10, 20, 10], n_classes=y_classes, batch_size=32,steps=100,
+#                                            optimizer="Adam",learning_rate=0.01,dropout=0.6)
+classifier = learn.DNNClassifier(hidden_units=[10, 20, 10], n_classes=y_classes,
+                                           optimizer="Adam",dropout=0.6)
 
 # Here we'll train our DNN
-classifier.fit(X_train, y_train, logdir='dnnLogs')
+# classifier.fit(X_train, y_train, logdir='dnnLogs)
+classifier.fit(X_train, y_train, steps=100, batch_size=32, monitors=learn.monitors.get_default_monitors())
 
 # and evaluate it on our dev data
 predictions = classifier.predict(X_dev)
@@ -174,16 +177,17 @@ classifier = learn.TensorFlowEstimator(model_fn=custom_model, n_classes=y_classe
                                        optimizer="Adam",learning_rate=0.01)
 
 # We'll make a function for training and evaluating
-def run_model(classifier,logdir=None,monitor=None):
+def run_model(classifier,logdir=None,monitors=None):
+
     # Train
-    classifier.fit(X_train, y_train, logdir=logdir,monitor=monitor)
+    classifier.fit(X_train, y_train, logdir=logdir,monitors=monitors)
 
     # Evaluate on dev data
     predictions = classifier.predict(X_dev)
     score = metrics.accuracy_score(y_dev, predictions)
     return score
 
-score = run_model(classifier,'customModelLogs')
+score = run_model(classifier,'customModelLogs',monitors=learn.monitors.get_default_monitors())
 print("Accuracy: %f" % score)
 
 # We got 100% accuracy, but keep in mind our dataset has only 150 datapoints.
@@ -243,34 +247,29 @@ def getHyperparameters(tune=False):
 
     return hyperparams
 
-# Now we'll wrap our model in a function so that we can instantiate it with new hyper-parameters.
-def instantiateModel(hyperparams):
+hyperparams = getHyperparameters(tune=False)
 
-    # We'll copy the same model from above
-    def custom_model(X,y):
-        X = learn.ops.batch_normalize(X, scale_after_normalization=True)
+# We'll copy the same model from above
+def custom_model(X,y):
+    # X = learn.ops.batch_normalize(X, scale_after_normalization=True)
 
-        layers = learn.ops.dnn(X, hyperparams['HIDDEN_UNITS'], activation=hyperparams['ACTIVATION_FUNCTION'],dropout=hyperparams['KEEP_PROB'])
+    layers = learn.ops.dnn(X, hyperparams['HIDDEN_UNITS'], activation=hyperparams['ACTIVATION_FUNCTION'],dropout=hyperparams['KEEP_PROB'])
 
-        return learn.models.logistic_regression(layers, y)
+    return learn.models.logistic_regression(layers, y)
 
-    classifier = learn.TensorFlowEstimator(model_fn=custom_model, n_classes=y_classes,batch_size=hyperparams['BATCH_SIZE'],
-                                           steps=hyperparams['STEPS'],optimizer=hyperparams['OPTIMIZER'],
-                                           learning_rate=hyperparams['LEARNING_RATE'])
+classifier = learn.TensorFlowEstimator(model_fn=custom_model, n_classes=y_classes,batch_size=hyperparams['BATCH_SIZE'],
+                                       steps=hyperparams['STEPS'],optimizer=hyperparams['OPTIMIZER'],
+                                       learning_rate=hyperparams['LEARNING_RATE'], continue_training=False)
 
-    # We'll make a monitor so that we can implement early stopping based on our train accuracy. This will prevent overfitting.
-    monitor = learn.monitors.BaseMonitor(early_stopping_rounds=int(hyperparams['MAX_BAD_COUNT']),print_steps=100)
-
-    return classifier, monitor
+# We'll make a monitor so that we can implement early stopping based on our dev accuracy. This will prevent overfitting.
+monitor = learn.monitors.ValidationMonitor(x=X_dev,y=y_dev, early_stopping_rounds=hyperparams['MAX_BAD_COUNT'])
 
 # Now we'll 'tune' our model by running a hyper parameter search over many runs
 for i in range(100):
 
     hyperparams = getHyperparameters(tune=True)
-    print(hyperparams)
-    classifier,monitor = instantiateModel(hyperparams)
 
-    score = run_model(classifier,monitor=monitor)
+    score = run_model(classifier,monitors=[monitor])
     print("Accuracy: %f" % score)
 
     # We don't need to log this array
@@ -291,4 +290,4 @@ for i in range(100):
     else:
         log.to_csv('model_log.csv', mode='a',header=False)
 
-# Open the csv file in an editor like libreoffice. Now you can sort thousands of runs by dev accuracy and find the best hyperparameters.
+# Open the csv file in libreoffice. Now you can sort thousands of runs by dev accuracy and find the best hyperparameters.
